@@ -7,4 +7,3 @@ require (
 )
 
 replace github.com/anwesh-b/MeroDB/lib v0.0.0 => ../lib
-    
