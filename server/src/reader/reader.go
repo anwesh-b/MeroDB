@@ -1,17 +1,17 @@
 package reader
 
 import (
-	cli "github.com/anwesh-b/MeroDB/lib/cli" 
-	string "github.com/anwesh-b/MeroDB/lib/string" 
-	parser "github.com/anwesh-b/MeroDB/server/src/parser" 
 	"bufio"
+	"fmt"
 	"os"
+
+	string "github.com/anwesh-b/MeroDB/lib/string"
+	parser "github.com/anwesh-b/MeroDB/server/src/parser"
 )
 
-
-func InjectReader(){
+func InjectReader() {
 	for {
-		cli.CLog("MeroDB > ")
+		fmt.Print("MeroDB > ")
 
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
@@ -25,5 +25,3 @@ func InjectReader(){
 		parser.EvaluateInput(text)
 	}
 }
-
-
