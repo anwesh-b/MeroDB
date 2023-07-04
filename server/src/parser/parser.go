@@ -2,19 +2,14 @@ package parser
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
 	cli "github.com/anwesh-b/MeroDB/lib/cli"
 )
 
-type Data struct {
-	id    int
-	name  string
-	email string
-}
-
-var myData []Data
+const fileName = "local.db"
 
 func insert(str string) {
 	s := strings.Split(str, " ")
@@ -27,18 +22,46 @@ func insert(str string) {
 		return
 	}
 
-	myData = append(myData, Data{
-		id:    id,
-		name:  datas[1],
-		email: datas[2],
-	})
+	file, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	lines := strings.Split(string(file), "\n")
+
+	for _, line := range lines {
+		if strings.HasPrefix(line, strconv.Itoa(id)) {
+			cli.CLog("Data with id " + strconv.Itoa(id) + " already exists")
+			return
+		}
+	}
+
+	output := string(file) + strconv.Itoa(id) + "\t" + datas[1] + "\t" + datas[2] + "\n"
+	err = ioutil.WriteFile(fileName, []byte(output), 0644)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	cli.CLog("Insert success")
 }
 
 func selectData(str string) {
-	for _, data := range myData {
-		cli.CLog(strconv.Itoa(data.id) + "\t" + data.name + "\t" + data.email)
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		items := strings.Split(line, "\t")
+
+		for _, item := range items {
+			fmt.Print(item + "\t")
+		}
+		fmt.Println("")
 	}
 }
 
@@ -53,13 +76,32 @@ func update(str string) {
 		return
 	}
 
-	for i, data := range myData {
-		if data.id == id {
-			myData[i].name = datas[1]
-			myData[i].email = datas[2]
-			cli.CLog("Updating success")
-			return
+	data, err := ioutil.ReadFile(fileName)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	lines := strings.Split(string(data), "\n")
+
+	var didUpdate bool = false
+
+	for i, line := range lines {
+		if strings.HasPrefix(line, strconv.Itoa(id)) {
+			lines[i] = strconv.Itoa(id) + "\t" + datas[1] + "\t" + datas[2]
+			output := strings.Join(lines, "\n")
+			err = ioutil.WriteFile(fileName, []byte(output), 0644)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			didUpdate = true
 		}
+	}
+	if didUpdate {
+		cli.CLog("Updating success")
+		return
 	}
 
 	cli.CLog("Couldnot find the data, update failed")
@@ -76,12 +118,37 @@ func deleteData(str string) {
 		return
 	}
 
-	for i, data := range myData {
-		if data.id == id {
-			myData = append(myData[:i], myData[i+1:]...)
-			cli.CLog("Deleting success")
-			return
+	data, err := ioutil.ReadFile(fileName)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	lines := strings.Split(string(data), "\n")
+
+	var didDelete bool = false
+
+	for i, line := range lines {
+		if strings.HasPrefix(line, strconv.Itoa(id)) {
+			lines[i] = ""
+
+			copy(lines[i:], lines[i+1:]) // Shift one index left, until the i.
+			lines = lines[:len(lines)-1] // Remove last element (write zero value).
+
+			output := strings.Join(lines, "\n")
+			err = ioutil.WriteFile(fileName, []byte(output), 0644)
+
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			didDelete = true
 		}
+	}
+	if didDelete {
+		cli.CLog("Deleting success")
+		return
 	}
 
 	cli.CLog("Couldnot find the data, delete failed")
