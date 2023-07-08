@@ -2,6 +2,6 @@
 Simple DB implementation
 
 ### Tasks
-- [ ] In Memory read write
+- [x] In Memory read write
 - [ ] Compiler
-- [ ] FS Read/Write
+- [x] FS Read/Write
