@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "/pb";
+
+service SessionService {
+  rpc GetSessionId (SessionServiceRequest) returns (SessionServiceResponse) {}
+}
+
+message SessionServiceRequest {
+  string message = 1;
+}
+
+message SessionServiceResponse {
+  string sessionId = 1;
+}
+
+

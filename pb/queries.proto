@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "/pb";
+
+service QueryService {
+  rpc  ExamineAndExecuteQuery (QueryServiceRequest) returns (QueryServiceResponse) {}
+}
+
+message QueryServiceRequest {
+  string sessionId = 1;
+  string query = 2;
+}
+
+message QueryServiceResponse {
+  string result = 1;
+}
+
+

@@ -55,7 +55,7 @@ func getReferenceTableDetails(tableName string) ([]string, error) {
 	return nil, errors.New("table does not exist")
 }
 
-func insert(str string) {
+func insert(str string) string {
 	s := strings.Split(str, " ")
 
 	tableName := s[1]
@@ -64,20 +64,20 @@ func insert(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	datas := s[2:]
 
 	if len(datas) != len(columns) {
 		fmt.Println("Column count does not match. The columns are: " + strings.Join(columns, ", "))
-		return
+		return "Error"
 	}
 
 	id, err := strconv.Atoi(datas[0])
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	fileName := filePath + tableName + ".db"
@@ -86,15 +86,16 @@ func insert(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	lines := strings.Split(string(file), "\n")
 
 	for _, line := range lines {
 		if strings.HasPrefix(line, strconv.Itoa(id)+" ") {
-			cli.CLog("Data with id " + strconv.Itoa(id) + " already exists")
-			return
+			var errr = "Data with id " + strconv.Itoa(id) + " already exists"
+			cli.CLog(errr)
+			return errr
 		}
 	}
 
@@ -110,9 +111,10 @@ func insert(str string) {
 	}
 
 	cli.CLog("Insert success")
+	return "Insert success"
 }
 
-func selectData(str string) {
+func selectData(str string) string {
 	tableName := strings.Split(str, " ")[1]
 
 	columns, err := getReferenceTableDetails(tableName)
@@ -127,7 +129,7 @@ func selectData(str string) {
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -143,9 +145,11 @@ func selectData(str string) {
 	}
 
 	w.Flush()
+
+	return "data found TODO"
 }
 
-func update(str string) {
+func update(str string) string {
 	s := strings.Split(str, " ")
 
 	tableName := s[1]
@@ -154,20 +158,20 @@ func update(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	datas := s[2:]
 
 	if len(datas) != len(columns) {
 		fmt.Println("Column count does not match. The columns are: " + strings.Join(columns, ", "))
-		return
+		return "Error"
 	}
 
 	id, err := strconv.Atoi(datas[0])
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	fileName := filePath + tableName + ".db"
@@ -176,7 +180,7 @@ func update(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -190,20 +194,21 @@ func update(str string) {
 			err = ioutil.WriteFile(fileName, []byte(output), 0644) // can optimize this code
 			if err != nil {
 				fmt.Println(err)
-				return
+				return "Error"
 			}
 			didUpdate = true
 		}
 	}
 	if didUpdate {
 		cli.CLog("Updating success")
-		return
+		return "Updating success"
 	}
 
 	cli.CLog("Couldnot find the data, update failed")
+	return "Couldnot find the data, update failed"
 }
 
-func deleteData(str string) {
+func deleteData(str string) string {
 	s := strings.Split(str, " ")
 	tableName := s[1]
 
@@ -211,7 +216,7 @@ func deleteData(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	deleteId := s[2]
@@ -219,7 +224,7 @@ func deleteData(str string) {
 	id, err := strconv.Atoi(deleteId)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	fileName := filePath + tableName + ".db"
@@ -228,7 +233,7 @@ func deleteData(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -247,20 +252,21 @@ func deleteData(str string) {
 
 			if err != nil {
 				fmt.Println(err)
-				return
+				return "Error"
 			}
 			didDelete = true
 		}
 	}
 	if didDelete {
 		cli.CLog("Deleting success")
-		return
+		return "Deleting success"
 	}
 
 	cli.CLog("Couldnot find the data, delete did not occur")
+	return "Couldnot find the data, delete did not occur"
 }
 
-func createTable(str string) {
+func createTable(str string) string {
 	s := strings.Split(str, " ")
 
 	tableName := s[1]
@@ -270,12 +276,12 @@ func createTable(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	if isTableExisting {
 		fmt.Println("Table already exists")
-		return
+		return "Table already exists"
 	}
 
 	fileName := filePath + tableName + ".db"
@@ -284,6 +290,7 @@ func createTable(str string) {
 
 	if err != nil {
 		log.Fatal(err)
+		return "Error"
 	}
 
 	defer f.Close()
@@ -296,9 +303,11 @@ func createTable(str string) {
 	if _, err := f.WriteString(strings.Join(tableColumns, " ") + "\n"); err != nil {
 		log.Println(err)
 	}
+
+	return "Table created successfully"
 }
 
-func dropTable(str string) {
+func dropTable(str string) string {
 	s := strings.Split(str, " ")
 
 	tableName := s[1]
@@ -307,7 +316,7 @@ func dropTable(str string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "Error"
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -326,7 +335,7 @@ func dropTable(str string) {
 
 			if err != nil {
 				fmt.Println(err)
-				return
+				return "Error"
 			}
 
 			e := os.Remove(fileName)
@@ -334,28 +343,29 @@ func dropTable(str string) {
 				log.Fatal(e)
 			}
 
-			return
+			return "Table deleted successfully"
 		}
 	}
 
 	fmt.Println("Table not found and not deleted")
+	return "Table not found and not deleted"
 }
 
-func EvaluateInput(str string) {
+func EvaluateInput(str string) string {
+	// To replace with factory pattern
 	if strings.HasPrefix(str, "insert ") {
-		insert(str)
+		return insert(str)
 	} else if strings.HasPrefix(str, "select ") {
-		selectData(str)
+		return selectData(str)
 	} else if strings.HasPrefix(str, "update ") {
-		update(str)
+		return update(str)
 	} else if strings.HasPrefix(str, "delete ") {
-		deleteData(str)
+		return deleteData(str)
 	} else if strings.HasPrefix(str, "create ") {
-		createTable(str)
+		return createTable(str)
 	} else if strings.HasPrefix(str, "drop ") {
-		dropTable(str)
-	} else {
-		cli.CLog("Invalid command")
+		return dropTable(str)
 	}
-	cli.CLog("")
+
+	return "Invalid command"
 }
